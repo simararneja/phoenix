@@ -731,7 +731,8 @@ public class WhereOptimizerTest extends BaseConnectionlessQueryTest {
         assertEquals(
                 rowKeyFilter(like(
                     ENTITY_ID,
-                    likeArg)),
+                    likeArg,
+                    context)),
                 filter);
 
         byte[] startRow = ByteUtil.concat(
@@ -757,7 +758,8 @@ public class WhereOptimizerTest extends BaseConnectionlessQueryTest {
         assertEquals(
                 rowKeyFilter(like(
                     ENTITY_ID,
-                    likeArg)),
+                    likeArg,
+                    context)),
                 filter);
 
         byte[] startRow = ByteUtil.concat(
@@ -783,7 +785,8 @@ public class WhereOptimizerTest extends BaseConnectionlessQueryTest {
         assertEquals(
                 rowKeyFilter(like(
                     substr(ENTITY_ID,1,10),
-                    likeArg)),
+                    likeArg,
+                    context)),
                 filter);
 
         byte[] startRow = ByteUtil.concat(
@@ -809,7 +812,8 @@ public class WhereOptimizerTest extends BaseConnectionlessQueryTest {
         assertEquals(
                 rowKeyFilter(like(
                     substr(ENTITY_ID,4,10),
-                    likeArg)),
+                    likeArg,
+                    context)),
                 filter);
 
         byte[] startRow = PVarchar.INSTANCE.toBytes(tenantId);
@@ -832,7 +836,8 @@ public class WhereOptimizerTest extends BaseConnectionlessQueryTest {
         assertEquals(
                 rowKeyFilter(like(
                     ENTITY_ID,
-                    likeArg)),
+                    likeArg,
+                    context)),
                 filter);
 
         byte[] startRow = PVarchar.INSTANCE.toBytes(tenantId);
@@ -855,7 +860,8 @@ public class WhereOptimizerTest extends BaseConnectionlessQueryTest {
         assertEquals(
                 rowKeyFilter(not(like(
                     ENTITY_ID,
-                    likeArg))),
+                    likeArg,
+                    context))),
                 filter);
 
         byte[] startRow = PVarchar.INSTANCE.toBytes(tenantId);
@@ -1270,6 +1276,22 @@ public class WhereOptimizerTest extends BaseConnectionlessQueryTest {
         Filter filter = scan.getFilter();
         assertNotNull(filter);
         assertTrue(filter instanceof RowKeyComparisonFilter);
+        assertArrayEquals(HConstants.EMPTY_START_ROW, scan.getStartRow());
+        assertArrayEquals(HConstants.EMPTY_END_ROW, scan.getStopRow());
+    }
+    
+    @Test
+    public void testRVCExpressionWithNonFirstLeadingColOfRowKey() throws SQLException {
+        String old_value = "value";
+        String orgId = getOrganizationId();
+        
+        String query = "select * from entity_history where (old_value, organization_id) >= (?,?)";
+        List<Object> binds = Arrays.<Object>asList(old_value, orgId);
+        StatementContext context = compileStatement(query, binds);
+        Scan scan = context.getScan();
+        Filter filter = scan.getFilter();
+        assertNotNull(filter);
+        assertTrue(filter instanceof SingleKeyValueComparisonFilter);
         assertArrayEquals(HConstants.EMPTY_START_ROW, scan.getStartRow());
         assertArrayEquals(HConstants.EMPTY_END_ROW, scan.getStopRow());
     }

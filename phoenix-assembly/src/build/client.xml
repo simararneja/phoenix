@@ -29,6 +29,16 @@
     <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
+
+  <containerDescriptorHandlers>
+    <containerDescriptorHandler>
+      <!--
+          aggregate SPI's so that things like HDFS FileSystem works in uberjar
+          http://docs.oracle.com/javase/tutorial/sound/SPI-intro.html
+      -->
+      <handlerName>metaInf-services</handlerName>
+    </containerDescriptorHandler>
+  </containerDescriptorHandlers>
   
   <componentDescriptors>
     <componentDescriptor>src/build/components-minimal.xml</componentDescriptor>
@@ -46,8 +56,8 @@
         <include>jline:jline</include>
         <include>sqlline:sqlline</include>
         <include>org.apache.hbase:hbase*</include>
-        <include>org.cloudera.htrace:htrace-core</include>
-        <include>io.netty:netty</include>
+        <include>org.apache.htrace:htrace-core</include>
+        <include>io.netty:netty-all</include>
         <include>commons-codec:commons-codec</include>
       </includes>
     </dependencySet>
